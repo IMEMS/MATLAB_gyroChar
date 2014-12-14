@@ -2,7 +2,12 @@ function [ScaleFactor, varargout] = gyroChar_ScaleFactor(amp, fileNumber, freq, 
 %% gyroChar_ScaleFactor Plots rotation rate scale factor and 
 %   transient rotation rate data.
 % 
-%   [ScaleFactor, (h)] = gyroChar_ScaleFactor(amp, fileNumber, freq, date,)
+%  USAGE
+%   ScaleFactor = gyroChar_ScaleFactor(amp, fileNumber, freq, date,...)
+%   [ScaleFactor, h] = gyroChar_ScaleFactor(amp, fileNumber, freq, date,...)
+%   [ScaleFactor, h, data] = gyroChar_ScaleFactor(amp, fileNumber, freq, date,...)
+%    where data = [rates amplitudes]
+%   [ScaleFactor, h, rates, amplitudes] = gyroChar_ScaleFactor(amp, fileNumber, freq, date,...)
 % 
 %  INPUTS
 %   amp - rate amplitudes vector
@@ -29,8 +34,12 @@ function [ScaleFactor, varargout] = gyroChar_ScaleFactor(amp, fileNumber, freq, 
 %    methods:
 %    'findPeaks' - Takes the average of numCycles peaks
 %    'maxs - Takes the average of the largest 2*numCycles
-%   plotAmp,pa - plots the amplitude as a line on the transient figures
+%   plot, p - enables all plots {default: true}
+%   plotAmp, pa - plots the amplitude as a line(s) on the transient figures
 %    {default: true}
+%   plotTrans, pt - plots the transient rate responses
+%   plotSSF, pssf - plots the single-sided scale factor {default: false}
+%   plotSF, psf - plots the scale factor {default: true}
 %   holdPPT, hPPT - hold existing power point presentation to add more
 %    slides {default: false}
 %   fullPlotAmp - amplitudes to plot to their own figures
@@ -57,7 +66,8 @@ if numel(varargin)>0
                        {'numCycles','n'},{'ampDetectMethod','adm'},...
                        {'ampMeas','am'},{'plotAmp','pa'},...
                        {'plotPeaks','pp'},{'holdPPT','hPPT'},...
-                       {'plotTrans','plotTransient','pt'},...
+                       {'plot','p'},{'plotTrans','plotTransient','pt'},...
+                       {'plotSSF','pssf'},{'plotSF','psf'}...
                        {'fullPlotAmp','fpa'}};
     params = validateInput(varargin, validParameters);
 else
@@ -120,8 +130,17 @@ end
 if(~isfield(params,'plotPeaks'))
     params.holdPPT = false;
 end
+if(~isfield(params,'plot'))
+    params.plot = true;
+end
 if(~isfield(params,'plotTrans'))
     params.plotTrans = true;
+end
+if(~isfield(params,'plotSSF'))
+    params.plotSSF = false;
+end
+if(~isfield(params,'plotSF'))
+    params.plotSF = true;
 end
 if(~isfield(params,'fullPlotAmp'))
 params.fullPlotAmp = [];
@@ -144,7 +163,10 @@ pptfile = fullfile(pwd, params.resultsDIR,...
                    ['Scale_Factor_' num2str(freq) 'Hz.ppt']);
 
 % Setup Results Directory
-if(~isdir(params.resultsDIR))
+if(~isdir(params.resultsDIR) && params.plot...
+   && (params.SaveIMG || params.SavePPT)...
+   && (params.plotTrans || params.plotSSF || params.plotSF...
+       || params.fullPlotAmp))
     [SUCCESS,~,~] = mkdir(params.resultsDIR);
     if(~SUCCESS) 
         disp('mkdir failed');
@@ -234,7 +256,7 @@ end
 
 %% Plot Transient Data
 
-if(params.plotTrans)
+if(params.plot && params.plotTrans)
     numFig = ceil(length(amp)/4);
 
     h = zeros(numFig,1);
@@ -308,7 +330,7 @@ if(params.plotTrans)
 end
 
 %% Plot specified amplitudes
-if(~isempty(params.fullPlotAmp))
+if(params.plot && ~isempty(params.fullPlotAmp))
     for i=1:length(params.fullPlotAmp)
         pN = (amp == params.fullPlotAmp(i));
         figure;
@@ -352,63 +374,72 @@ if(~isempty(params.fullPlotAmp))
 end
 
 %% Single Sided Scale Factor Plot
-h(end+1) = figure;
-hold on;
-plot(Vpeak_data(:,1),Vpeak_data(:,2));
-
-title('Scale Factor (single Sided)','FontSize',18);
-xlabel('Rotation Rate (deg/sec)','FontSize',13);
-ylabel('Rate Output Amplitude (mV)','FontSize',13);
-
-p = polyfit(Vpeak_data(:,1),Vpeak_data(:,2),1);
-fit_line = p(1)* Vpeak_data(:,1) + p(2);
-plot(Vpeak_data(:,1),fit_line, 'g');
-hold off;
-ht = text(0.1,0.8,{'Linear Fit:'; [num2str(p(1)) '*rate + ' num2str(p(2))]},'FontSize',15,'units','normalized');
-% Save to a Picture/ppt
-PlotTitle = strcat('Scale Factor Single Sided)', num2str(numFig), '_d', date);
-if(params.SaveIMG)
-    print('-dbmp ',gcf,fullfile(params.resultsDIR, PlotTitle), '-r400');
-end
-if(params.savePPT)
-    saveppt(pptfile,char(PlotTitle),32, '-r400');
+if(params.plot && params.plotSSF)
+    p = polyfit(Vpeak_data(:,1),Vpeak_data(:,2),1);
+    fit_line = p(1)* Vpeak_data(:,1) + p(2);
+    
+    h(end+1) = figure;
+    hold on;
+    plot(Vpeak_data(:,1),Vpeak_data(:,2));
+    plot(Vpeak_data(:,1),fit_line, 'g');
+    hold off;
+    title('Scale Factor (single Sided)','FontSize',18);
+    xlabel('Rotation Rate (deg/sec)','FontSize',13);
+    ylabel('Rate Output Amplitude (mV)','FontSize',13);
+    ht = text(0.1,0.8,{'Linear Fit:'; [num2str(p(1)) '*rate + ' num2str(p(2))]},'FontSize',15,'units','normalized');
+    % Save to a Picture/ppt
+    PlotTitle = strcat('Scale Factor Single Sided)', num2str(numFig), '_d', date);
+    if(params.SaveIMG)
+        print('-dbmp ',gcf,fullfile(params.resultsDIR, PlotTitle), '-r400');
+    end
+    if(params.savePPT)
+        saveppt(pptfile,char(PlotTitle),32, '-r400');
+    end
 end
 
 %% Symmetric Scale Factor Plot
 Vpeak_data_sym(:,1) = [flipud(-Vpeak_data(:,1)); Vpeak_data(:,1)];
 Vpeak_data_sym(:,2) = [flipud(-Vpeak_data(:,2)); Vpeak_data(:,2)];
-
-h(end+1) = figure;
-hold on;
-plot(Vpeak_data_sym(:,1), Vpeak_data_sym(:,2), 'b*');
-
-title('Scale Factor','FontSize',18);
-xlabel('Rotation Rate (deg/sec)','FontSize',13);
-ylabel('Rate Output Amplitude (mV)','FontSize',13);
-
-
 p_sym = polyfit(Vpeak_data_sym(:,1), Vpeak_data_sym(:,2),1);
 fit_line = p_sym(1)* Vpeak_data_sym(:,1) + p_sym(2);
-plot(Vpeak_data_sym(:,1),fit_line, 'g');
-hold off;
-ht = text(0.1,0.8,{'Linear Fit:'; [num2str(p_sym(1)) '*rate']},'FontSize',15,'units','normalized');
 
-% Save to a Picture/ppt
-PlotTitle = strcat('Scale Factor', num2str(numFig), '_d', date);
-if(params.SaveIMG)
-    print('-dbmp ',gcf,fullfile(params.resultsDIR, PlotTitle), '-r400');
-end
-if(params.savePPT)
-    saveppt(pptfile,char(PlotTitle),32, '-r400');
-end
+if(params.plot && params.plotSF)
+    h(end+1) = figure;
+    hold on;
+    plot(Vpeak_data_sym(:,1), Vpeak_data_sym(:,2), 'b*');
+    title('Scale Factor','FontSize',18);
+    xlabel('Rotation Rate (deg/sec)','FontSize',13);
+    ylabel('Rate Output Amplitude (mV)','FontSize',13);
+    plot(Vpeak_data_sym(:,1),fit_line, 'g');
+    hold off;
+    ht = text(0.1,0.8,{'Linear Fit:'; [num2str(p_sym(1)) 'mv/deg/s']},'FontSize',15,'units','normalized');
 
+    % Save to a Picture/ppt
+    PlotTitle = strcat('Scale Factor', num2str(numFig), '_d', date);
+    if(params.SaveIMG)
+        print('-dbmp ',gcf,fullfile(params.resultsDIR, PlotTitle), '-r400');
+    end
+    if(params.savePPT)
+        saveppt(pptfile,char(PlotTitle),32, '-r400');
+    end
+end
 ScaleFactor = p_sym(1);
-if(nargout == 2)
-    varargout = h;
-end
+
 %% Display the scale factor information 
 disp(' ');
 disp(['scale factor = ' num2str(ScaleFactor) ' mV/deg/s']);
+
+%% Setup Outputs 
+if ~exist('h','var')
+    h = []; 
+end
+if(nargout == 2)
+    varargout = h;
+elseif(nargout == 3)
+    varargout = {h Vpeak_data};
+elseif(nargout == 4)
+    varargout = {h Vpeak_data(:,1) Vpeak_data(:,2)};
+end
 
 end
 
