@@ -22,7 +22,7 @@ function varargout = gyroChar_instr_FreqResponseGUI(varargin)
 
 % Edit the above text to modify the response to help gyroChar_instr_FreqResponseGUI
 
-% Last Modified by GUIDE v2.5 18-Dec-2014 04:25:13
+% Last Modified by GUIDE v2.5 18-Dec-2014 15:06:50
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -77,26 +77,36 @@ function varargout = gyroChar_instr_FreqResponseGUI_OutputFcn(hObject, eventdata
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
-% --- Executes on button press in pushbutton1.
-function pushbutton1_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1 (see GCBO)
+% --- Executes on button press in pushbutton1_connect.
+function pushbutton1_connect_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton1_connect (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-axes(handles.axes1);
-cla;
+handles.deviceObj = icdevice('AgNA.mdd', get(handles.edit1_resource,'String'));
 
-popup_sel_index = get(handles.popupmenu1, 'Value');
-switch popup_sel_index
-    case 1
-        plot(rand(5));
-    case 2
-        plot(sin(1:0.01:25.99));
-    case 3
-        bar(1:.5:10);
-    case 4
-        plot(membrane);
-    case 5
-        surf(peaks);
+% Connect to instrument
+connect(handles.deviceObj);
+
+% Initialize
+invoke(handles.deviceObj, 'initwithoptions',...
+       get(handles.edit1_resource,'String'), true, false, '');
+
+
+% axes(handles.axes1);
+% cla;
+% 
+% popup_sel_index = get(handles.popupmenu1, 'Value');
+% switch popup_sel_index
+%     case 1
+%         plot(rand(5));
+%     case 2
+%         plot(sin(1:0.01:25.99));
+%     case 3
+%         bar(1:.5:10);
+%     case 4
+%         plot(membrane);
+%     case 5
+%         surf(peaks);
 end
 
 
@@ -172,18 +182,18 @@ function pushbutton2_Callback(hObject, eventdata, handles)
 
 
 
-function edit1_Callback(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
+function edit1_resource_Callback(hObject, eventdata, handles)
+% hObject    handle to edit1_resource (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit1 as text
-%        str2double(get(hObject,'String')) returns contents of edit1 as a double
+% Hints: get(hObject,'String') returns contents of edit1_resource as text
+%        str2double(get(hObject,'String')) returns contents of edit1_resource as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
+function edit1_resource_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit1_resource (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
