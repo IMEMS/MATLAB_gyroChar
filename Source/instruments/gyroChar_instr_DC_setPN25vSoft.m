@@ -1,7 +1,7 @@
 %% gyroChar_instr_DC_setPN25vSoft
 function OBJ = gyroChar_instr_DC_setPN25vSoft(OBJ, V_P25V, V_N25V, varargin)
 %% gyroChar_instr_DC_setPN25vSoft sets the +/- 25v inputs by slowly
-%   increasing the output voltage
+%   changing the output voltage
 % 
 %  USAGE
 %   OBJ = gyroChar_instr_DC_setPN25vSoft(OBJ, V_P25V, V_N25V, ...)
@@ -75,23 +75,25 @@ if((V_P25V < params.stepSize) && (abs(V_N25V) < params.stepSize))
     OBJ = gyroChar_instr_DC_setP25v(OBJ, V_P25V);% Set +25v output
     OBJ = gyroChar_instr_DC_setN25v(OBJ, V_N25V);% Set -25v output
 else
-    numStepsP = round(V_P25V/0.5);
-    numStepsN = round(abs(V_N25V)/0.5);
+    numStepsP = round(abs(V_P25V-OBJ.UserData.P25v.V)/0.5);
+    numStepsN = round(abs(V_N25V-OBJ.UserData.N25v.V)/0.5);
     if (numStepsP > numStepsN) 
          numSteps = numStepsP;
     else numSteps = numStepsN;
     end
+    signP25V = sign(V_P25V-OBJ.UserData.P25v.V);
+    signN25V = sign(V_N25V-OBJ.UserData.N25v.V);
     for i = 1:numSteps+1
         stepV = i*params.stepSize;
-        if(stepV < V_P25V)
-            OBJ = gyroChar_instr_DC_setP25v(OBJ, stepV);% Set +25v output
+        if(OBJ.UserData.P25v.V + signP25V * stepV < V_P25V)
+            OBJ = gyroChar_instr_DC_setP25v(OBJ, OBJ.UserData.P25v.V + signP25V * stepV);% Set +25v output
         else
             OBJ = gyroChar_instr_DC_setP25v(OBJ, V_P25V);% Set +25v output
         end
-        if(stepV < abs(V_N25V))
-            OBJ = gyroChar_instr_DC_setN25v(OBJ, -stepV);% Set +25v output
+        if(abs(OBJ.UserData.N25v.V + signN25V * stepV) < abs(V_N25V))
+            OBJ = gyroChar_instr_DC_setN25v(OBJ, OBJ.UserData.N25v.V + signN25V * stepV);% Set -25v output
         else
-            OBJ = gyroChar_instr_DC_setN25v(OBJ, V_N25V);% Set +25v output
+            OBJ = gyroChar_instr_DC_setN25v(OBJ, V_N25V);% Set -25v output
         end
         pause(params.stepT);
     end

@@ -12,12 +12,12 @@
 [DC, idn] = gyroChar_instr_DC_init('GPIB0::5::INSTR','Ilim',0.25);
 disp(['Instrument: ' idn]);
 
-%% Set Voltages
-% Set +25v output = 1v and -25v output = -2v and wait 5sec
-disp('Test 1')
-DC = gyroChar_instr_DC_setP25v(DC, 1);
-DC = gyroChar_instr_DC_setN25v(DC, -2);
-pause(5);
+% %% Set Voltages
+% % Set +25v output = 1v and -25v output = -2v and wait 5sec
+% disp('Test 1')
+% DC = gyroChar_instr_DC_setP25v(DC, 1);
+% DC = gyroChar_instr_DC_setN25v(DC, -2);
+% pause(5);
 
 % Set +25v output = 3v and -25v output = -4v and wait 5sec
 disp('Test 2')
