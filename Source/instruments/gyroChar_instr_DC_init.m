@@ -64,7 +64,7 @@ idn = fscanf(OBJ);
 % +25v Output
 fprintf(OBJ, 'INST:SEL P25V');
 fprintf(OBJ, 'SOUR:VOLT?');
-OBJ.UserData.P25v.V = fscanf(OBJ);
+OBJ.UserData.P25v.V = str2double(fscanf(OBJ));
 if(params.Ilim ~= 1 && params.P25vIlim == params.Ilim) 
     fprintf(OBJ, ['SOUR:CURR ' num2str(params.Ilim)]);
 elseif(params.Ilim ~= 1 && params.P25vIlim ~= params.Ilim) 
@@ -78,7 +78,7 @@ OBJ.UserData.P25v.EN = fscanf(OBJ);
 % -25v Output
 fprintf(OBJ, 'INST:SEL N25V');
 fprintf(OBJ, 'SOUR:VOLT?');
-OBJ.UserData.N25v.V = fscanf(OBJ);
+OBJ.UserData.N25v.V = str2double(fscanf(OBJ));
 if(params.Ilim ~= 1 && params.N25vIlim == params.Ilim) 
     fprintf(OBJ, ['SOUR:CURR ' num2str(params.Ilim)]);
 elseif(params.Ilim ~= 1 && params.N25vIlim ~= params.Ilim) 

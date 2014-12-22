@@ -84,16 +84,16 @@ else
     signP25V = sign(V_P25V-OBJ.UserData.P25v.V);
     signN25V = sign(V_N25V-OBJ.UserData.N25v.V);
     for i = 1:numSteps+1
-        stepV = i*params.stepSize;
-        if((OBJ.UserData.P25v.V + signP25V * stepV < V_P25V && (signP25V == 1)) || ((OBJ.UserData.P25v.V + signP25V * stepV > V_P25V) && (signP25V == -1)))
-            OBJ = gyroChar_instr_DC_setP25v(OBJ, OBJ.UserData.P25v.V + signP25V * stepV);% Set +25v output
+%         stepV = i*params.stepSize;
+        if((OBJ.UserData.P25v.V + signP25V * params.stepSize < V_P25V && (signP25V == 1)) || ((OBJ.UserData.P25v.V + signP25V * params.stepSize > V_P25V) && (signP25V == -1)))
+            gyroChar_instr_DC_setP25v(OBJ, OBJ.UserData.P25v.V + signP25V * params.stepSize);% Set +25v output
         else
-            OBJ = gyroChar_instr_DC_setP25v(OBJ, V_P25V);% Set +25v output
+            gyroChar_instr_DC_setP25v(OBJ, V_P25V);% Set +25v output
         end
-        if((((OBJ.UserData.N25v.V + signN25V * stepV) < V_N25V) && (signP25V == 1)) || (((OBJ.UserData.N25v.V + signN25V * stepV) > V_N25V) && (signP25V == -1)))
-            OBJ = gyroChar_instr_DC_setN25v(OBJ, OBJ.UserData.N25v.V + signN25V * stepV);% Set -25v output
+        if((((OBJ.UserData.N25v.V + signN25V * params.stepSize) < V_N25V) && (signN25V == 1)) || (((OBJ.UserData.N25v.V + signN25V * params.stepSize) > V_N25V) && (signN25V == -1)))
+            gyroChar_instr_DC_setN25v(OBJ, OBJ.UserData.N25v.V + signN25V * params.stepSize);% Set -25v output
         else
-            OBJ = gyroChar_instr_DC_setN25v(OBJ, V_N25V);% Set -25v output
+            gyroChar_instr_DC_setN25v(OBJ, V_N25V);% Set -25v output
         end
         pause(params.stepT);
     end
