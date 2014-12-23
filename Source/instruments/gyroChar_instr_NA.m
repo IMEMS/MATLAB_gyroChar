@@ -49,16 +49,16 @@ else
 end
 % Options
 if ~isfield(params,'folder')
-params.folder = pwd;
+    params.folder = pwd;
 end
 if ~isfield(params,'saveCSV')
-params.saveCSV = false;
+    params.saveCSV = false;
 end
 if ~isfield(params,'ifbw')
-params.ifbw = 15; % IF bandwidth in Hz
+    params.ifbw = 15; % IF bandwidth in Hz
 end
 if ~isfield(params,'numPts')
-params.numPts = 1601; % Number of points
+    params.numPts = 1601; % Number of points
 end
 %% Connect to the network analyzer
 % Create a device object. 

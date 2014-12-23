@@ -7,12 +7,8 @@ function [deviceObj, Freqs, MAG, Phase, M1] = gyroChar_instr_NA_measFreqResponse
 %   [deviceObj, Freqs, MAG, Phase, M1] = gyroChar_instr_NA_MeasFreqResponse(deviceObj, ...)
 % 
 %  INPUTS
-%   HWOBJ - Visa resources name of the hardware network analyzer
-%    Currently only tested with an Agilent E5061B Network Analyzer
+%   deviceObj - network analyzer instrument object
 %  OPTIONAL INPUT PARAMETER PAIRS
-%   pwr RFpwr p - Output power (dBm) {default: -45dBm}
-%   numPts npts - number of points to plot {default: 1601 (E5061B MAX)}
-%   ifbw - IF bandwidth (Hz) {default: 15Hz}
 %   centerFreq cf - center frequency (Hz) {default: 6700Hz}
 %   span s - span (Hz) {default: 100Hz}
 % 
@@ -29,6 +25,55 @@ function [deviceObj, Freqs, MAG, Phase, M1] = gyroChar_instr_NA_measFreqResponse
 %  E5063A, E8361A, E8362B, E8363B, E8364B, E8361C, E8362C, E8363C, E8364C, 
 %  N5230A, N5230C, N5241A, N5242A, N5244A, N5245A, N5264A, N5247A, N5221A, 
 %  N5222A, N5224A, N5225A, N5227A, N5239A, N5231A, N5232A, N5234A, N5235A
+
+%% Check and parse inputs
+if numel(varargin)>0
+    validParameters = {{'centerFreq','cf'},{'span','s'},{'folder','f'},...
+                       {'sweepTimeOut','sto'},...
+                       {'saveCSV', 'sc'},{'saveIMG','img'},...
+                       {'saveFig','sf'},{'savePPT','ppt'},...
+                       {'saveMfile','saveM','sm'},{'folder','f'},...
+                       {'dataDIR','data directory','data dir'},...
+                       {'resultsDIR','results directory','results dir'}};
+%                    {'trigMode', 'triggerMode', 't'},...
+    params = validateInput(varargin, validParameters);
+else
+    % Just make addlParms an empty struct so that 'isfield' doesn't error
+    % out.
+    params=struct;
+end
+% Options
+if ~isfield(params,'sweepTimeOut')
+    params.sweepTimeOut = 100000000;
+end
+if ~isfield(params,'saveCSV')
+    params.saveCSV = false;
+end
+if ~isfield(params,'saveIMG')
+    params.saveIMG = false;
+end
+if ~isfield(params,'saveFIG')
+    params.saveFIG = false;
+end
+if ~isfield(params,'savePPT')
+    params.savePPT = false;
+end
+if ~isfield(params,'saveMfile')
+    params.saveMfile = false;
+end
+if ~isfield(params,'folder')
+    params.folder = pwd;
+end
+if ~isfield(params,'dataDIR')
+    params.dataDIR = 'Frequency Response Data';
+end
+if ~isfield(params,'resultsDIR')
+    params.resultsDIR = 'Frequency Response Results';
+end
+% if ~isfield(params,'trigMode')
+%     params.trigMode = deviceObj.UserData.AGNA_VAL_TRIGGER_MODE_CONTINUOUS;
+% end
+deviceObj.UserData.params = updateParams(deviceObj.UserData.params, params);
 
 %% Measure Frequency Response
 
@@ -48,7 +93,7 @@ invoke(deviceObj.Attributeaccessors(1), 'setattributeviint32',...
  deviceObj.UserData.AGNA_VAL_TRIGGER_MODE_CONTINUOUS);
 % Trigger
 invoke(deviceObj.Channel(1),'channeltriggersweep',...
-       'Channel1',100000000);
+       'Channel1',params.sweepTimeOut);
 % invoke(deviceObj.Channel(1),'channelasynchronoustriggersweep',...
 %        'Channel1');
 
@@ -100,5 +145,15 @@ M1.phase = angle(M1.Real+1i*M1.Imag);
 invoke(deviceObj.Attributeaccessors(1), 'setattributeviint32',...
 'Channel1:Measurement2',deviceObj.UserData.AGNA_ATTR_TRIGGER_SOURCE,...
 deviceObj.UserData.AGNA_VAL_AGILENT_NA_TRIGGER_SOURCE_INTERNAL);
+
+% Save data
+if(params.saveCSV)
+    fid = fopen(params.CSVfile,'w');
+    fprintf(fid,'# Channel 1\n');
+    fprintf(fid,'# Trace 1\n');
+    fprintf(fid,'Frequency, Formatted Data, Formatted Data\n');
+    fclose(fid);
+    dlmwrite(params.CSVname,[Freqs MAG],',',3,1,'-append','precision',11);
+end
 
 end

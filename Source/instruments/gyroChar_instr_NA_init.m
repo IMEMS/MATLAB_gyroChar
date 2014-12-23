@@ -1,10 +1,10 @@
 %% gyroChar_instr_NA_init
-function [deviceObj] = gyroChar_instr_NA_init(HWOBJ, varargin)
-% gyroChar_instr_NA_init Initializes network analyzer instrument control 
-%  Also initializes usefult constants in deviceObj.UserData
+function deviceObj = gyroChar_instr_NA_init(HWOBJ, varargin)
+%% gyroChar_instr_NA_init Initializes network analyzer instrument control 
+%  Also initializes useful constants in deviceObj.UserData
 % 
 %  USAGE
-%   gyroChar_instr_NA_init(HWOBJ, ...)
+%   deviceObj gyroChar_instr_NA_init(HWOBJ, ...)
 % 
 %  INPUTS
 %   HWOBJ - Visa resources name of the hardware network analyzer
@@ -15,7 +15,8 @@ function [deviceObj] = gyroChar_instr_NA_init(HWOBJ, varargin)
 %   ifbw - IF bandwidth (Hz) {default: 15Hz}
 %   centerFreq cf - center frequency (Hz) {default: 6700Hz}
 %   span s - span (Hz) {default: 100Hz}
-%   triggerMode TrigMode - Trigger mode
+%   triggerMode TrigMode - Trigger mode 
+%    {default: AGNA_VAL_TRIGGER_MODE_CONTINUOUS}
 %    0 = AGNA_VAL_TRIGGER_MODE_CONTINUOUS
 %    1 = AGNA_VAL_TRIGGER_MODE_HOLD
 % 
@@ -32,6 +33,8 @@ function [deviceObj] = gyroChar_instr_NA_init(HWOBJ, varargin)
 %  E5063A, E8361A, E8362B, E8363B, E8364B, E8361C, E8362C, E8363C, E8364C, 
 %  N5230A, N5230C, N5241A, N5242A, N5244A, N5245A, N5264A, N5247A, N5221A, 
 %  N5222A, N5224A, N5225A, N5227A, N5239A, N5231A, N5232A, N5234A, N5235A
+% 
+% see also
 
 %% Check and parse inputs
 if numel(varargin)>0
@@ -90,6 +93,7 @@ deviceObj.UserData.AGNA_ATTR_CHANNEL_MEASUREMENT_FORMAT  = 1150014;
 deviceObj.UserData.AGNA_ATTR_TRIGGER_SOURCE              = 1150042;
 % Constants
 deviceObj.UserData.AGNA_VAL_AGILENT_NA_MEASUREMENT_LOG_MAG = 0;
+deviceObj.UserData.AGNA_VAL_AGILENT_NA_MEASUREMENT_LIN_MAG = 1;
 deviceObj.UserData.AGNA_VAL_AGILENT_NA_MEASUREMENT_PHASE   = 2;
 % Marker Search Type Enum AgNA_ChannelMeasurementMarkerSearch
 deviceObj.UserData.AGNA_VAL_AGILENT_NA_MARKER_SEARCH_TYPE_TARGET       = 0;

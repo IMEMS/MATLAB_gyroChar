@@ -22,7 +22,7 @@ function varargout = gyroChar_instr_FreqResponseGUI(varargin)
 
 % Edit the above text to modify the response to help gyroChar_instr_FreqResponseGUI
 
-% Last Modified by GUIDE v2.5 18-Dec-2014 15:06:50
+% Last Modified by GUIDE v2.5 23-Dec-2014 01:17:14
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -60,7 +60,7 @@ guidata(hObject, handles);
 % This sets up the initial plot - only do when we are invisible
 % so window can get raised using gyroChar_instr_FreqResponseGUI.
 if strcmp(get(hObject,'Visible'),'off')
-    plot(rand(5));
+%     plot(rand(5));
 end
 
 % UIWAIT makes gyroChar_instr_FreqResponseGUI wait for user response (see UIRESUME)
@@ -77,37 +77,28 @@ function varargout = gyroChar_instr_FreqResponseGUI_OutputFcn(hObject, eventdata
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
-% --- Executes on button press in pushbutton1_connect.
-function pushbutton1_connect_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton1_connect (see GCBO)
+% --- Executes on button press in togglebutton_connect.
+function togglebutton_connect_Callback(hObject, eventdata, handles)
+% hObject    handle to togglebutton_connect (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-handles.deviceObj = icdevice('AgNA.mdd', get(handles.edit1_resource,'String'));
-
-% Connect to instrument
-connect(handles.deviceObj);
-
-% Initialize
-invoke(handles.deviceObj, 'initwithoptions',...
-       get(handles.edit1_resource,'String'), true, false, '');
-
-
-% axes(handles.axes1);
-% cla;
-% 
-% popup_sel_index = get(handles.popupmenu1, 'Value');
-% switch popup_sel_index
-%     case 1
-%         plot(rand(5));
-%     case 2
-%         plot(sin(1:0.01:25.99));
-%     case 3
-%         bar(1:.5:10);
-%     case 4
-%         plot(membrane);
-%     case 5
-%         surf(peaks);
+if(get(hObject,'Value') == 1)
+    handles.na = gyroChar_instr_NA_init(get(handles.edit1_resource,'String'),...
+                  'pwr',  str2double(get(handles.edit_pwr,'String')),...
+                  'ifbw', str2double(get(handles.edit_ifbw,'String')),...
+                  'npts', str2double(get(handles.edit_npts,'String')),...
+                  'centerFreq', str2double(get(handles.edit_centerFreq,'String')),...
+                  'span', str2double(get(handles.edit_span,'String')));
+    set(hObject,'String','Disconnect');
+    set(handles.text_connect,'String','Connected');
+    set(handles.text_connect,'BackgroundColor','green');
+else
+    gyroChar_instr_NA_close(handles.na);
+    set(hObject,'String','Connect');
+    set(handles.text_connect,'String','Not Connected');
+    set(handles.text_connect,'BackgroundColor','red');
 end
+
 
 
 % --------------------------------------------------------------------
@@ -174,13 +165,17 @@ end
 set(hObject, 'String', {'plot(rand(5))', 'plot(sin(1:0.01:25))', 'bar(1:.5:10)', 'plot(membrane)', 'surf(peaks)'});
 
 
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
+% --- Executes on button press in pushbutton_sweep.
+function pushbutton_sweep_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton_sweep (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
+if(get(handles.togglebutton_connect,'Value'))
+    [handles.na, Freqs, MAG, Phase, M1] = gyroChar_instr_NA_measFreqResponse(handles.na);
+    guidata(hObject,handles);
+    plot(handles.axes_mag, Freqs, MAG);
+    plot(handles.axes2, Freqs, MAG);
+end
 
 function edit1_resource_Callback(hObject, eventdata, handles)
 % hObject    handle to edit1_resource (see GCBO)
@@ -205,18 +200,18 @@ end
 
 
 
-function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
+function edit_centerFreq_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_centerFreq (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit2 as text
-%        str2double(get(hObject,'String')) returns contents of edit2 as a double
+% Hints: get(hObject,'String') returns contents of edit_centerFreq as text
+%        str2double(get(hObject,'String')) returns contents of edit_centerFreq as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
+function edit_centerFreq_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_centerFreq (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -228,18 +223,18 @@ end
 
 
 
-function edit3_Callback(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
+function edit_span_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_span (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit3 as text
-%        str2double(get(hObject,'String')) returns contents of edit3 as a double
+% Hints: get(hObject,'String') returns contents of edit_span as text
+%        str2double(get(hObject,'String')) returns contents of edit_span as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
+function edit_span_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_span (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -251,18 +246,18 @@ end
 
 
 
-function edit4_Callback(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
+function edit_ifbw_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_ifbw (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit4 as text
-%        str2double(get(hObject,'String')) returns contents of edit4 as a double
+% Hints: get(hObject,'String') returns contents of edit_ifbw as text
+%        str2double(get(hObject,'String')) returns contents of edit_ifbw as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit4_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit4 (see GCBO)
+function edit_ifbw_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_ifbw (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -274,18 +269,18 @@ end
 
 
 
-function edit5_Callback(hObject, eventdata, handles)
-% hObject    handle to edit5 (see GCBO)
+function edit_npts_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_npts (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit5 as text
-%        str2double(get(hObject,'String')) returns contents of edit5 as a double
+% Hints: get(hObject,'String') returns contents of edit_npts as text
+%        str2double(get(hObject,'String')) returns contents of edit_npts as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit5_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit5 (see GCBO)
+function edit_npts_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_npts (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -296,8 +291,117 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in pushbutton3.
-function pushbutton3_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton3 (see GCBO)
+% --- Executes on button press in pushbutton_save.
+function pushbutton_save_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton_save (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+
+function edit_pwr_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_pwr (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_pwr as text
+%        str2double(get(hObject,'String')) returns contents of edit_pwr as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_pwr_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_pwr (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes during object deletion, before destroying properties.
+function figure1_DeleteFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes when user attempts to close figure1.
+function figure1_CloseRequestFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: delete(hObject) closes the figure
+delete(hObject);
+
+
+% --- Executes on button press in checkbox_saveCSV.
+function checkbox_saveCSV_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_saveCSV (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_saveCSV
+
+
+% --- Executes on button press in checkbox_saveIMG.
+function checkbox_saveIMG_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_saveIMG (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_saveIMG
+
+
+% --- Executes on button press in checkbox_saveM.
+function checkbox_saveM_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_saveM (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_saveM
+
+
+% --- Executes on button press in checkbox_savePPT.
+function checkbox_savePPT_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_savePPT (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_savePPT
+
+
+
+function edit_folder_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_folder (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_folder as text
+%        str2double(get(hObject,'String')) returns contents of edit_folder as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_folder_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_folder (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes during object deletion, before destroying properties.
+function text_connect_DeleteFcn(hObject, eventdata, handles)
+% hObject    handle to text_connect (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if(get(hObject,'Value'))
+    gyroChar_instr_NA_close(handles.na);
+end
