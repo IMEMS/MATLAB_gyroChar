@@ -26,10 +26,7 @@ function [OBJ, idn] = gyroChar_instr_DC_init(RSRCNAME, varargin)
 % 
 % Author: Curtis Mayberry
 % 
-% See also gyroChar_instr_DC_close gyroChar_instr_DC_setP25v
-% gyroChar_instr_DC_setN25v gyroChar_instr_DC_setPN25v
-% gyroChar_instr_DC_setPN25vSoft gyroChar_instr_DC_script_example 
-% gyroChar_instr_DC_enable
+% See also 
 
 %% Check and parse inputs
 if numel(varargin)>0

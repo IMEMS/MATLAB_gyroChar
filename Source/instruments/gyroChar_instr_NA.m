@@ -137,7 +137,6 @@ MAG = zeros(1,1601);
 %     'channelmeasurementfetchx','Channel1:Measurement1',1601,Freqs);
 % MeasNameMag = invoke(deviceObj.Channelmeasurement,'getchannelmeasurementname','Channel1',1,20);
 
-
 % Measure Phase
 invoke(deviceObj.Channelmeasurement,...
     'channelmeasurementcreate', 'Channel1:Measurement2',1,2);
