@@ -1,7 +1,7 @@
 %% gyroChar_instr_NA_MeasFreqResponse
 function [deviceObj, Freqs, MAG, Phase, M1] = gyroChar_instr_NA_measFreqResponse(deviceObj, varargin)
-% gyroChar_instr_NA_MeasFreqResponse Measures frequency response of the 
-%  gain-phase port
+%% gyroChar_instr_NA_MeasFreqResponse Measures frequency response 
+%   of the gain-phase port
 % 
 %  USAGE
 %   [deviceObj, Freqs, MAG, Phase, M1] = gyroChar_instr_NA_MeasFreqResponse(deviceObj, ...)

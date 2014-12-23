@@ -1,5 +1,5 @@
 function [freqs, mag, phase, h]= gyroChar_FreqResponse(filename,date,span,varargin)
-% gyroChar_Spectrum Generates the frequency response from an Agilent E5061B
+%% gyroChar_Spectrum Generates the frequency response from an Agilent E5061B
 %  network analyzer gain-phase port sweep
 % 
 % [freqs, mag, phase, h]= gyroChar_FreqResponse(filename,date,span);
